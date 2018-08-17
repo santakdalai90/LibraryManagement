@@ -1,9 +1,12 @@
 package main
 
 import (
+	"time"
+
 	"github.com/betacraft/yaag/irisyaag"
 	"github.com/betacraft/yaag/yaag"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/middleware/basicauth"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 )
@@ -34,6 +37,34 @@ func setRoutes(app *iris.Application) {
 	})
 }
 
+func autheniticationHandler(ctx iris.Context) {
+	username, password, _ := ctx.Request().BasicAuth()
+	ctx.Writef("%s %s:%s", ctx.Path(), username, password)
+
+}
+
+func setupAuthentication(app *iris.Application) {
+	authConfig := basicauth.Config{
+		Users:   map[string]string{"admin": "Pass@123", "sysadmin": "pppp"},
+		Realm:   "Authorization Required",
+		Expires: time.Duration(30) * time.Minute,
+	}
+
+	authentication := basicauth.New(authConfig)
+
+	// app.Get("/", func(ctx iris.Context) {
+	// 	ctx.Redirect("/admin")
+	// })
+
+	needAuth := app.Party("/login", authentication)
+	{
+		needAuth.Get("/", autheniticationHandler)
+		needAuth.Get("/profile", autheniticationHandler)
+		needAuth.Get("/settings", autheniticationHandler)
+	}
+
+}
+
 func initApp() *iris.Application {
 	app := iris.New() //create new iris application
 	app.Logger().SetLevel("debug")
@@ -44,6 +75,8 @@ func initApp() *iris.Application {
 	initYaag(app)
 
 	setRoutes(app)
+
+	setupAuthentication(app)
 
 	return app
 }
