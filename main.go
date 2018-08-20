@@ -8,6 +8,7 @@ import (
 	"github.com/betacraft/yaag/irisyaag"
 	"github.com/betacraft/yaag/yaag"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/cache"
 	"github.com/kataras/iris/middleware/basicauth"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
@@ -38,7 +39,7 @@ func setRoutes(app *iris.Application) {
 		ctx.JSON(iris.Map{"message": "Hello World!"})
 	})
 
-	app.Get("/aboutus", func(ctx iris.Context) {
+	app.Get("/aboutus", cache.Handler(10*time.Second), func(ctx iris.Context) {
 		data, _ := utility.ReadFile("aboutus.md")
 		ctx.Markdown(data)
 	})
