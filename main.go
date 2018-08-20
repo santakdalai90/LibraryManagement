@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/santakdalai90/LibraryManagement/utility"
+
 	"github.com/betacraft/yaag/irisyaag"
 	"github.com/betacraft/yaag/yaag"
 	"github.com/kataras/iris"
@@ -34,6 +36,11 @@ func setRoutes(app *iris.Application) {
 
 	app.Get("hello", func(ctx iris.Context) {
 		ctx.JSON(iris.Map{"message": "Hello World!"})
+	})
+
+	app.Get("/aboutus", func(ctx iris.Context) {
+		data, _ := utility.ReadFile("aboutus.md")
+		ctx.Markdown(data)
 	})
 }
 
